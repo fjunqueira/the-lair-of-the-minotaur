@@ -2,7 +2,6 @@
 // Created by fabio on 12/15/15.
 //
 
-#include <iostream>
 #include "asset_manager.h"
 
 AssetManager::AssetManager()

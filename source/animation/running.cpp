@@ -11,7 +11,7 @@ animation::Running::Running(const Image* spritesheet, const int& num_of_frames, 
     this->MoveToNextFrame(direction, 0);
 }
 
-int animation::Running::get_type() const
+int animation::Running::type() const
 {
     return animation::states::RUNNING;
 }

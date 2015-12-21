@@ -11,6 +11,7 @@
 #include <map>
 #include <algorithm>
 #include <GL/gl.h>
+#include <iostream>
 #include "lodepng.h"
 
 class AssetManager

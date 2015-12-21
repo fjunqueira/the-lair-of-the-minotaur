@@ -26,7 +26,7 @@ namespace animation
     public:
         Dying(const Image* spritesheet, const int& num_of_frames, const int& direction);
 
-        int get_type() const;
+        int type() const;
 
         bool MoveToNextFrame(const int& direction, const float& delta);
 

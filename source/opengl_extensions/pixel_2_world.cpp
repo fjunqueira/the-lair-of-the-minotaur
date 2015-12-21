@@ -9,8 +9,8 @@ math::Vector2<float> opengl_extensions::Pixel2World(const int& x, const int& y)
     GLint viewport[4];
     GLdouble modelview[16];
     GLdouble projection[16];
-    GLfloat win_x, win_y, win_z;
-    GLdouble pos_x, pos_y, pos_z;
+    GLfloat win_x = 0, win_y = 0, win_z = 0;
+    GLdouble pos_x = 0, pos_y = 0, pos_z = 0;
 
     glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
     glGetDoublev(GL_PROJECTION_MATRIX, projection);

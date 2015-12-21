@@ -18,7 +18,7 @@ namespace pathfinding
         unsigned char runid[16];
         PathfindingNode* parent_node = nullptr;
 
-        float weight = 0;
+        int weight = 0;
 
         bool is_walkable = true;
         bool was_visited = false;

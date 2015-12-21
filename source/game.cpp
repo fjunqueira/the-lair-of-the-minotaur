@@ -10,15 +10,19 @@
 #include "gameobject/game_object_drawer.h"
 #include "enemy.h"
 #include "enemy_manager.h"
+#include "player.h"
+#include "opengl_extensions/pixel_2_world.h"
 
 
 AssetManager* asset_manager;
 pathfinding::PathfindingGraph* pathfinding_graph;
 TileMap* tile_map;
-
 gameobject::SimpleGameObject* entrance;
+Player* player;
 
 std::vector<Enemy> enemies;
+bool game_over = false;
+int points = 0;
 
 void post_redisplay()
 {
@@ -31,7 +35,29 @@ void post_redisplay()
 void mouse(int button, int state, int x, int y)
 #pragma clang diagnostic pop
 {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && !game_over)
+    {
+        auto point = opengl_extensions::Pixel2World(x, y);
 
+        auto index = tile_map->GetTileIndexByPosition(point);
+
+        if (!tile_map->IndexInBounds(index))
+            return;
+
+        auto node1 = player->current_node();
+
+        auto node2 = pathfinding_graph->GetNodeByIndex(index);
+
+        auto path = pathfinding_graph->FindPath(*node1, *node2);
+
+        player->ChangePath(path);
+
+        Enemy* nearestEnemy = enemy_manager::GetNearestEnemy(&enemies, point);
+
+        //player->SetTarget(nearestEnemy);
+
+        glutPostRedisplay();
+    }
 }
 
 #pragma clang diagnostic push
@@ -40,7 +66,15 @@ void mouse(int button, int state, int x, int y)
 void keyboard(unsigned char key, int x, int y)
 #pragma clang diagnostic pop
 {
+    if (key == '\r' && game_over)
+    {
+        game_over = false;
+        points = 0;
 
+        enemies.clear();
+
+        player->MoveToCenter();
+    }
 }
 
 int last_elapsed_time = 0;
@@ -66,19 +100,17 @@ void display()
         std::for_each(enemies.begin(), enemies.end(), [&](Enemy& enemy)
         {
             enemy.Update(delta_time);
-
-            if (enemy.GetCurrentNode()->index == math::Vector2<int>(16, 13))
-                enemy.die();
-
             gameobject::DrawGameObject(enemy);
         });
+
+        player->Update(delta_time);
+        gameobject::DrawGameObject(*player);
     }
     glFlush();
 
-    //Pass the if logic to the add enemy method
     total_elapsed_time += delta_time;
 
-    if (total_elapsed_time > 100)
+    if (total_elapsed_time > 1000)
     {
         total_elapsed_time = 0;
         enemy_manager::AddEnemy(*tile_map, *asset_manager, *pathfinding_graph, enemies);
@@ -97,6 +129,18 @@ void init_game_data()
     entrance = new gameobject::SimpleGameObject(tile_map->GetTilePositionByIndex(math::Vector2<int>(16, 13)),
                                                 math::Vector2<float>(100, 100),
                                                 asset_manager->get_asset("entrance")->textureid);
+
+    auto minotaur_spritesheet = asset_manager->get_asset("minotaur");
+
+    player = new Player(tile_map,
+                        pathfinding_graph,
+                        animation::Running(minotaur_spritesheet, 192, directions::SOUTH),
+                        animation::Idle(minotaur_spritesheet, 192, directions::SOUTH),
+                        animation::Attacking(minotaur_spritesheet, 192, directions::SOUTH),
+                        math::Vector2<float>(40, 80),
+                        minotaur_spritesheet->textureid);
+
+    player->MoveToCenter();
 }
 
 void cleanup_game_data()
@@ -105,6 +149,7 @@ void cleanup_game_data()
     delete tile_map;
     delete asset_manager;
     delete entrance;
+    delete player;
 }
 
 void init()

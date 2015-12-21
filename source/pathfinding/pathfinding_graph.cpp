@@ -3,8 +3,6 @@
 //
 
 #include "pathfinding_graph.h"
-#include "binary_heap.h"
-#include <algorithm>
 
 pathfinding::PathfindingGraph::PathfindingGraph(const math::Vector2<int>& graph_dimensions) :
         graph_dimensions_(graph_dimensions), size_(graph_dimensions.y * graph_dimensions.x), node_comparator_(),

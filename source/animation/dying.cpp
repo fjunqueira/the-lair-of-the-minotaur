@@ -11,7 +11,7 @@ animation::Dying::Dying(const Image* spritesheet, const int& num_of_frames, cons
     this->MoveToNextFrame(direction, 0);
 }
 
-int animation::Dying::get_type() const
+int animation::Dying::type() const
 {
     return animation::states::DYING;
 }

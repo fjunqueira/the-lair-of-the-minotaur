@@ -11,7 +11,7 @@ animation::Idle::Idle(const Image* spritesheet, const int& num_of_frames, const 
     this->MoveToNextFrame(direction, 0);
 }
 
-int animation::Idle::get_type() const
+int animation::Idle::type() const
 {
     return animation::states::IDLE;
 }

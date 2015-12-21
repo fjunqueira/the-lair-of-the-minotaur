@@ -3,7 +3,6 @@
 //
 
 #include "enemy_manager.h"
-#include "directions.h"
 
 void enemy_manager::AddEnemy(TileMap& map, const AssetManager& asset_manager,
                              pathfinding::PathfindingGraph& pathfinding_graph,
@@ -43,4 +42,23 @@ void enemy_manager::AddEnemy(TileMap& map, const AssetManager& asset_manager,
                                                 *pathfinding_graph.GetNodeByIndex(math::Vector2<int>(16, 13))));
 
     enemies.push_back(enemy);
+}
+
+Enemy* ::enemy_manager::GetNearestEnemy(std::vector<Enemy>* enemies, const math::Vector2<float>& point)
+{
+    Enemy* nearest_enemy = nullptr;
+    float nearest_enemy_distance = FLT_MAX;
+
+    std::for_each(enemies->begin(), enemies->end(), [&](Enemy& enemy)
+    {
+        auto distance = (point - enemy.position()).magnitude();
+
+        if (distance < nearest_enemy_distance)
+        {
+            nearest_enemy = &enemy;
+            nearest_enemy_distance = distance;
+        }
+    });
+
+    return nearest_enemy;
 }

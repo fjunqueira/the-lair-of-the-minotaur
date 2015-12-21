@@ -10,6 +10,8 @@
 #include "comparator.h"
 #include "pathfinding_node_comparator.h"
 #include <vector>
+#include "binary_heap.h"
+#include <algorithm>
 
 namespace pathfinding
 {

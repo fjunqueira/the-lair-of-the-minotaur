@@ -10,6 +10,7 @@
 #include "tile_map.h"
 #include "pathfinding/pathfinding_graph.h"
 #include "animation/running.h"
+#include "directions.h"
 
 class Enemy : public gameobject::GameObject
 {

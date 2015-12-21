@@ -13,7 +13,7 @@ namespace animation
     class AnimationState
     {
     public:
-        virtual int get_type() const = 0;
+        virtual int type() const = 0;
 
         virtual bool MoveToNextFrame(const int& direction, const float& delta) = 0;
 

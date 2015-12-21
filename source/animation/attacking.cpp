@@ -11,7 +11,7 @@ animation::Attacking::Attacking(const Image* spritesheet, const int& num_of_fram
     this->MoveToNextFrame(direction, 0);
 }
 
-int animation::Attacking::get_type() const
+int animation::Attacking::type() const
 {
     return animation::states::ATTACKING;
 }

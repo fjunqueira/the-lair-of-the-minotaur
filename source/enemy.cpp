@@ -3,7 +3,6 @@
 //
 
 #include "enemy.h"
-#include "directions.h"
 
 Enemy::Enemy(TileMap* const& map, pathfinding::PathfindingGraph* const& graph, const animation::Running& running,
              const math::Vector2<float>& position, const math::Vector2<float>& dimensions,
