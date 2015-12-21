@@ -25,10 +25,10 @@ bool animation::Attacking::MoveToNextFrame(const int& direction, const float& de
 
     this->current_frame_coords_ = std::vector<math::Vector2<float>>
             {
-                    math::Vector2<float>(frame_width_ * (current_frame_ - 1), frame_height_ * (direction - 1)),
-                    math::Vector2<float>(frame_width_ * current_frame_, frame_height_ * (direction - 1)),
-                    math::Vector2<float>(frame_width_ * current_frame_, frame_height_ * direction),
                     math::Vector2<float>(frame_width_ * (current_frame_ - 1), frame_height_ * direction),
+                    math::Vector2<float>(frame_width_ * current_frame_, frame_height_ * direction),
+                    math::Vector2<float>(frame_width_ * current_frame_, frame_height_ * (direction - 1)),
+                    math::Vector2<float>(frame_width_ * (current_frame_ - 1), frame_height_ * (direction - 1)),
             };
 
     if (total_elapsed_time_ > 100 || delta == 0)

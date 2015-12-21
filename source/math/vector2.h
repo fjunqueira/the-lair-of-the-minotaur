@@ -24,6 +24,8 @@ namespace math
 
         Vector2<T> operator*(const T& value) const;
 
+        bool operator==(const Vector2<T>& other) const;
+
         T magnitude() const;
     };
 }

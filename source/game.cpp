@@ -7,10 +7,9 @@
 #include "pathfinding/pathfinding_graph.h"
 #include "tile_map.h"
 #include "asset_manager.h"
-#include "animation/attacking.h"
-#include "animation/dying.h"
-#include "animation/idle.h"
 #include "gameobject/game_object_drawer.h"
+#include "enemy.h"
+#include "enemy_manager.h"
 
 
 AssetManager* asset_manager;
@@ -18,6 +17,8 @@ pathfinding::PathfindingGraph* pathfinding_graph;
 TileMap* tile_map;
 
 gameobject::SimpleGameObject* entrance;
+
+std::vector<Enemy> enemies;
 
 void post_redisplay()
 {
@@ -42,14 +43,46 @@ void keyboard(unsigned char key, int x, int y)
 
 }
 
+int last_elapsed_time = 0;
+int total_elapsed_time = 0;
+
 void display()
 {
+    int elapsed_time = glutGet(GLUT_ELAPSED_TIME);
+    int delta_time = elapsed_time - last_elapsed_time;
+
+    last_elapsed_time = elapsed_time;
+
+    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&](Enemy& enemy)
+    {
+        return enemy.dead();
+    }), enemies.end());
+
     glClear(0);
     {
         gameobject::DrawGameObjects((gameobject::GameObject**) tile_map->GetTiles(), tile_map->size());
         gameobject::DrawGameObject(*entrance);
+
+        std::for_each(enemies.begin(), enemies.end(), [&](Enemy& enemy)
+        {
+            enemy.Update(delta_time);
+
+            if (enemy.GetCurrentNode()->index == math::Vector2<int>(16, 13))
+                enemy.die();
+
+            gameobject::DrawGameObject(enemy);
+        });
     }
     glFlush();
+
+    //Pass the if logic to the add enemy method
+    total_elapsed_time += delta_time;
+
+    if (total_elapsed_time > 100)
+    {
+        total_elapsed_time = 0;
+        enemy_manager::AddEnemy(*tile_map, *asset_manager, *pathfinding_graph, enemies);
+    }
 }
 
 void init_game_data()
@@ -58,59 +91,12 @@ void init_game_data()
 
     pathfinding_graph = new pathfinding::PathfindingGraph(math::Vector2<int>(30, 30));
 
-    pathfinding_graph->FindPath(*pathfinding_graph->GetNodeByIndex(math::Vector2<int>(0, 0)),
-                                *pathfinding_graph->GetNodeByIndex(math::Vector2<int>(10, 20)));
-
-    pathfinding_graph->FindPath(*pathfinding_graph->GetNodeByIndex(math::Vector2<int>(10, 0)),
-                                *pathfinding_graph->GetNodeByIndex(math::Vector2<int>(15, 15)));
-
-    pathfinding_graph->FindPath(*pathfinding_graph->GetNodeByIndex(math::Vector2<int>(25, 12)),
-                                *pathfinding_graph->GetNodeByIndex(math::Vector2<int>(13, 27)));
-
     tile_map = new TileMap(math::Vector2<float>(20, 20), math::Vector2<int>(30, 30),
                            asset_manager->get_asset("cave_floor")->textureid);
 
     entrance = new gameobject::SimpleGameObject(tile_map->GetTilePositionByIndex(math::Vector2<int>(16, 13)),
                                                 math::Vector2<float>(100, 100),
                                                 asset_manager->get_asset("entrance")->textureid);
-
-    animation::Attacking attacking(asset_manager->get_asset("minotaur"), 192, 1);
-
-    attacking.MoveToNextFrame(2, 4);
-    attacking.MoveToNextFrame(2, 4);
-    attacking.MoveToNextFrame(2, 4);
-    attacking.MoveToNextFrame(2, 4);
-
-    attacking.GetCurrentFrameCoords();
-
-    animation::Dying dying(asset_manager->get_asset("minotaur"), 192, 1);
-
-    dying.MoveToNextFrame(2, 4);
-    dying.MoveToNextFrame(2, 4);
-    dying.MoveToNextFrame(2, 4);
-    dying.MoveToNextFrame(2, 4);
-
-    dying.GetCurrentFrameCoords();
-
-    animation::Idle idle(asset_manager->get_asset("minotaur"), 192, 1);
-
-    idle.MoveToNextFrame(2, 4);
-    idle.MoveToNextFrame(2, 4);
-    idle.MoveToNextFrame(2, 4);
-    idle.MoveToNextFrame(2, 4);
-
-    idle.GetCurrentFrameCoords();
-
-    animation::Attacking running(asset_manager->get_asset("minotaur"), 192, 1);
-
-    running.MoveToNextFrame(2, 4);
-    running.MoveToNextFrame(2, 4);
-    running.MoveToNextFrame(2, 4);
-    running.MoveToNextFrame(2, 4);
-
-    running.GetCurrentFrameCoords();
-
-    gameobject::DrawGameObjects((gameobject::GameObject**) tile_map->GetTiles(), tile_map->size());
 }
 
 void cleanup_game_data()
