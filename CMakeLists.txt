@@ -68,7 +68,7 @@ set(SOURCE_FILES
         source/opengl_extensions/pixel_2_world.cpp
         source/opengl_extensions/pixel_2_world.h
         source/enemy.cpp source/enemy.h
-        source/player.cpp source/player.h source/directions.cpp source/directions.h source/enemy_manager.cpp source/enemy_manager.h)
+        source/player.cpp source/player.h source/directions.cpp source/directions.h source/enemy_manager.cpp source/enemy_manager.h source/opengl_extensions/text.cpp source/opengl_extensions/text.h)
 
 add_executable(the-lair-of-the-minotaur ${SOURCE_FILES})
 

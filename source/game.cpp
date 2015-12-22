@@ -12,6 +12,7 @@
 #include "enemy_manager.h"
 #include "player.h"
 #include "opengl_extensions/pixel_2_world.h"
+#include "opengl_extensions/text.h"
 
 
 AssetManager* asset_manager;
