@@ -1,6 +1,6 @@
 # the-lair-of-the-minotaur
 
-Another project made for the graphics processing subject in college.
+Another project made for the graphics processing subject in college, an isometric 2d game.
 
 This one was really fun to make!
 
