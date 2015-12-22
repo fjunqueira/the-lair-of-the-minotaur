@@ -21,9 +21,9 @@ private:
 
     pathfinding::PathfindingGraph* graph_;
 
-    int current_node_;
+    std::vector<Enemy>* enemies_;
 
-    Enemy* target_ = nullptr;
+    int current_node_;
 
     std::vector<pathfinding::PathfindingNode*> path_;
 
@@ -35,9 +35,12 @@ private:
 
     void ChangeAnimation(animation::AnimationState* state);
 
+    Enemy* const GetNearestEnemy(const math::Vector2<float>& point) const;
+
 public:
     Player(TileMap* const map,
            pathfinding::PathfindingGraph* const graph,
+           std::vector<Enemy>* const enemies,
            const animation::Running& running,
            const animation::Idle& idle,
            const animation::Attacking& attacking,
@@ -51,8 +54,6 @@ public:
     void Update(const float& delta);
 
     const std::vector<math::Vector2<float>> GetTextureCoords() const;
-
-    void SetTarget(Enemy* const enemy);
 
     void MoveToCenter();
 };

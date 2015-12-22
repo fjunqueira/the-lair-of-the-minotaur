@@ -15,8 +15,6 @@ namespace enemy_manager
 {
     void AddEnemy(TileMap& map, const AssetManager& asset_manager, pathfinding::PathfindingGraph& pathfinding_graph,
                   std::vector<Enemy>& enemies);
-
-    Enemy* GetNearestEnemy(std::vector<Enemy>* enemies, const math::Vector2<float>& point);
 };
 
 

@@ -52,10 +52,6 @@ void mouse(int button, int state, int x, int y)
 
         player->ChangePath(path);
 
-        Enemy* nearestEnemy = enemy_manager::GetNearestEnemy(&enemies, point);
-
-        //player->SetTarget(nearestEnemy);
-
         glutPostRedisplay();
     }
 }
@@ -77,43 +73,67 @@ void keyboard(unsigned char key, int x, int y)
     }
 }
 
+void DisplayGameOver()
+{
+    glClear(0);
+    {
+        opengl_extensions::DisplayText(0, 250, 1, 0, 0, "GAMEOVER");
+
+        auto points_text = "SCORE: " + std::to_string(points);
+        opengl_extensions::DisplayText(0, 200, 1, 0, 0, points_text);
+
+        opengl_extensions::DisplayText(0, 150, 1, 0, 0, "PRESS ENTER TO RESTART");
+    }
+    glFlush();
+}
+
 int last_elapsed_time = 0;
 int total_elapsed_time = 0;
 
-void display()
+void Display()
 {
     int elapsed_time = glutGet(GLUT_ELAPSED_TIME);
     int delta_time = elapsed_time - last_elapsed_time;
 
     last_elapsed_time = elapsed_time;
 
-    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&](Enemy& enemy)
+    if (game_over)
+        DisplayGameOver();
+    else
     {
-        return enemy.dead();
-    }), enemies.end());
-
-    glClear(0);
-    {
-        gameobject::DrawGameObjects((gameobject::GameObject**) tile_map->GetTiles(), tile_map->size());
-        gameobject::DrawGameObject(*entrance);
-
-        std::for_each(enemies.begin(), enemies.end(), [&](Enemy& enemy)
+        auto enemies_count = enemies.size();
+        enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&](Enemy& enemy)
         {
-            enemy.Update(delta_time);
-            gameobject::DrawGameObject(enemy);
-        });
+            return enemy.dead();
+        }), enemies.end());
+        points += enemies_count - enemies.size();
 
-        player->Update(delta_time);
-        gameobject::DrawGameObject(*player);
-    }
-    glFlush();
+        glClear(GL_COLOR_BUFFER_BIT);
+        {
+            gameobject::DrawGameObjects((gameobject::GameObject**) tile_map->GetTiles(), tile_map->size());
+            gameobject::DrawGameObject(*entrance);
 
-    total_elapsed_time += delta_time;
+            std::for_each(enemies.begin(), enemies.end(), [&](Enemy& enemy)
+            {
+                enemy.Update(delta_time);
+                gameobject::DrawGameObject(enemy);
 
-    if (total_elapsed_time > 1000)
-    {
-        total_elapsed_time = 0;
-        enemy_manager::AddEnemy(*tile_map, *asset_manager, *pathfinding_graph, enemies);
+                if (!game_over)
+                    game_over = enemy.GetCurrentNode()->index == math::Vector2<int>(16, 13);
+            });
+
+            player->Update(delta_time);
+            gameobject::DrawGameObject(*player);
+        }
+        glFlush();
+
+        total_elapsed_time += delta_time;
+
+        if (total_elapsed_time > 1000)
+        {
+            total_elapsed_time = 0;
+            enemy_manager::AddEnemy(*tile_map, *asset_manager, *pathfinding_graph, enemies);
+        }
     }
 }
 
@@ -134,6 +154,7 @@ void init_game_data()
 
     player = new Player(tile_map,
                         pathfinding_graph,
+                        &enemies,
                         animation::Running(minotaur_spritesheet, 192, directions::SOUTH),
                         animation::Idle(minotaur_spritesheet, 192, directions::SOUTH),
                         animation::Attacking(minotaur_spritesheet, 192, directions::SOUTH),
@@ -172,7 +193,7 @@ int main(int argc, char** argv)
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(1000, 600);
     glutCreateWindow("The Lair of the Minotaur");
-    glutDisplayFunc(display);
+    glutDisplayFunc(Display);
     glutIdleFunc(post_redisplay);
     glutMouseFunc(mouse);
     glutKeyboardFunc(keyboard);

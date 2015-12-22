@@ -3,6 +3,7 @@
 //
 
 #include "player.h"
+#include "enemy_manager.h"
 
 void Player::ChangeAnimation(animation::AnimationState* state)
 {
@@ -13,10 +14,15 @@ void Player::ChangeAnimation(animation::AnimationState* state)
     }
 }
 
-Player::Player(TileMap* const map, pathfinding::PathfindingGraph* const graph, const animation::Running& running,
-               const animation::Idle& idle, const animation::Attacking& attacking,
-               const math::Vector2<float>& dimensions, const unsigned int& textureid) :
-        map_(map), graph_(graph), running_(running), idle_(idle), attacking_(attacking),
+Player::Player(TileMap* const map,
+               pathfinding::PathfindingGraph* const graph,
+               std::vector<Enemy>* const enemies,
+               const animation::Running& running,
+               const animation::Idle& idle,
+               const animation::Attacking& attacking,
+               const math::Vector2<float>& dimensions,
+               const unsigned int& textureid) :
+        map_(map), graph_(graph), running_(running), idle_(idle), attacking_(attacking), enemies_(enemies),
         GameObject(math::Vector2<float>(), dimensions, textureid)
 {
     this->current_ = &this->idle_;
@@ -59,15 +65,15 @@ void Player::Update(const float& delta)
 
         auto current_node = this->path_[this->current_node_];
 
-        if (this->target_ != nullptr)
-        {
-            if ((this->position_ - this->target_->position()).magnitude() < 30)
-            {
-                this->target_->die();
-                this->target_ = nullptr;
+        Enemy* target = nullptr;
 
-                ChangeAnimation(&this->attacking_);
-            }
+        if (this->current_->type() == animation::states::RUNNING)
+            target = this->GetNearestEnemy(this->map_->GetTilePositionByIndex(current_node->index));
+
+        if (target != nullptr && (this->position_ - target->position()).magnitude() < 30)
+        {
+            target->die();
+            ChangeAnimation(&this->attacking_);
         }
         else if (this->current_->MoveToNextFrame(directions::GetCardinalDirection(previous_node, current_node), delta))
         {
@@ -81,11 +87,6 @@ const std::vector<math::Vector2<float>> Player::GetTextureCoords() const
     return this->current_->GetCurrentFrameCoords();
 }
 
-void Player::SetTarget(Enemy* const enemy)
-{
-    this->target_ = enemy;
-}
-
 void Player::MoveToCenter()
 {
     auto starting_position = this->map_->GetTilePositionByIndex(math::Vector2<int>(15, 15));
@@ -94,4 +95,23 @@ void Player::MoveToCenter()
 
     this->ChangePath(
             std::vector<pathfinding::PathfindingNode*>() = {this->graph_->GetNodeByIndex(math::Vector2<int>(15, 15))});
+}
+
+Enemy* const Player::GetNearestEnemy(const math::Vector2<float>& point) const
+{
+    Enemy* nearest_enemy = nullptr;
+    float nearest_enemy_distance = FLT_MAX;
+
+    std::for_each(this->enemies_->begin(), this->enemies_->end(), [&](Enemy& enemy)
+    {
+        auto distance = (point - enemy.position()).magnitude();
+
+        if (distance < nearest_enemy_distance)
+        {
+            nearest_enemy = &enemy;
+            nearest_enemy_distance = distance;
+        }
+    });
+
+    return nearest_enemy;
 }
