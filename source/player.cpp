@@ -3,7 +3,6 @@
 //
 
 #include "player.h"
-#include "enemy_manager.h"
 
 void Player::ChangeAnimation(animation::AnimationState* state)
 {

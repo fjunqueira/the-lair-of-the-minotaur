@@ -13,6 +13,7 @@
 #include "animation/idle.h"
 #include "animation/attacking.h"
 #include "directions.h"
+#include <float.h>
 
 class Player : public gameobject::GameObject
 {

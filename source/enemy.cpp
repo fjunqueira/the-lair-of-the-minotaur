@@ -29,15 +29,15 @@ void Enemy::Update(const float& delta)
     {
         auto current_node = this->path_[this->current_node_];
 
-        auto nextNode = this->path_[this->current_node_ + 1];
+        auto next_node = this->path_[this->current_node_ + 1];
 
         auto current_node_pos = this->map_->GetTilePositionByIndex(current_node->index);
 
-        auto next_node_pos = this->map_->GetTilePositionByIndex(nextNode->index);
+        auto next_node_pos = this->map_->GetTilePositionByIndex(next_node->index);
 
         this->position_ = this->position_ + (next_node_pos - current_node_pos) * 0.001f * delta;
 
-        this->animation_.MoveToNextFrame(directions::GetCardinalDirection(current_node, nextNode), delta);
+        this->animation_.MoveToNextFrame(directions::GetCardinalDirection(current_node, next_node), delta);
 
         if ((this->position_ - next_node_pos).magnitude() < 5)
             this->current_node_++;
