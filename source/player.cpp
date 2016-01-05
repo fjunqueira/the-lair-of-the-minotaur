@@ -4,18 +4,9 @@
 
 #include "player.h"
 
-void Player::ChangeAnimation(animation::AnimationState* state)
-{
-    if (this->current_->type() != state->type())
-    {
-        state->Reset();
-        this->current_ = state;
-    }
-}
-
 Player::Player(TileMap* const map,
                pathfinding::PathfindingGraph* const graph,
-               std::vector<Enemy>* const enemies,
+               std::vector<Enemy*>* const enemies,
                const animation::Running& running,
                const animation::Idle& idle,
                const animation::Attacking& attacking,
@@ -50,7 +41,7 @@ void Player::Update(const float& delta)
 
         this->position_ = this->position_ + (next_node_position - this->position_) * 0.01f * delta;
 
-        ChangeAnimation(&this->running_);
+        this->ChangeAnimation(&this->running_);
 
         if ((this->position_ - next_node_position).magnitude() < 5)
             this->current_node_++;
@@ -72,11 +63,11 @@ void Player::Update(const float& delta)
         if (target != nullptr && (this->position_ - target->position()).magnitude() < 30)
         {
             target->die();
-            ChangeAnimation(&this->attacking_);
+            this->ChangeAnimation(&this->attacking_);
         }
         else if (this->current_->MoveToNextFrame(directions::GetCardinalDirection(previous_node, current_node), delta))
         {
-            ChangeAnimation(&this->idle_);
+            this->ChangeAnimation(&this->idle_);
         }
     }
 }
@@ -101,16 +92,25 @@ Enemy* const Player::GetNearestEnemy(const math::Vector2<float>& point) const
     Enemy* nearest_enemy = nullptr;
     float nearest_enemy_distance = FLT_MAX;
 
-    std::for_each(this->enemies_->begin(), this->enemies_->end(), [&](Enemy& enemy)
+    std::for_each(this->enemies_->begin(), this->enemies_->end(), [&](Enemy* enemy)
     {
-        auto distance = (point - enemy.position()).magnitude();
+        auto distance = (point - enemy->position()).magnitude();
 
-        if (distance < nearest_enemy_distance)
+        if (distance < nearest_enemy_distance && !enemy->dying())
         {
-            nearest_enemy = &enemy;
+            nearest_enemy = enemy;
             nearest_enemy_distance = distance;
         }
     });
 
     return nearest_enemy;
+}
+
+void Player::ChangeAnimation(animation::AnimationState* state)
+{
+    if (this->current_->type() != state->type())
+    {
+        state->Reset();
+        this->current_ = state;
+    }
 }

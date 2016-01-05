@@ -14,7 +14,7 @@
 namespace enemy_manager
 {
     void AddEnemy(TileMap& map, const AssetManager& asset_manager, pathfinding::PathfindingGraph& pathfinding_graph,
-                  std::vector<Enemy>& enemies);
+                  std::vector<Enemy*>& enemies);
 };
 
 

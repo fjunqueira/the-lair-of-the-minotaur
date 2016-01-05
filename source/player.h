@@ -22,7 +22,7 @@ private:
 
     pathfinding::PathfindingGraph* graph_;
 
-    std::vector<Enemy>* enemies_;
+    std::vector<Enemy*>* enemies_;
 
     int current_node_;
 
@@ -41,7 +41,7 @@ private:
 public:
     Player(TileMap* const map,
            pathfinding::PathfindingGraph* const graph,
-           std::vector<Enemy>* const enemies,
+           std::vector<Enemy*>* const enemies,
            const animation::Running& running,
            const animation::Idle& idle,
            const animation::Attacking& attacking,

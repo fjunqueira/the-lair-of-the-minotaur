@@ -21,7 +21,7 @@ TileMap* tile_map;
 gameobject::SimpleGameObject* entrance;
 Player* player;
 
-std::vector<Enemy> enemies;
+std::vector<Enemy*> enemies;
 bool game_over = false;
 int points = 0;
 
@@ -68,6 +68,9 @@ void keyboard(unsigned char key, int x, int y)
         game_over = false;
         points = 0;
 
+        std::for_each(enemies.begin(), enemies.end(), [&](Enemy* enemy)
+        { delete enemy; });
+
         enemies.clear();
 
         player->MoveToCenter();
@@ -76,16 +79,12 @@ void keyboard(unsigned char key, int x, int y)
 
 void DisplayGameOver()
 {
-    glClear(0);
-    {
-        opengl_extensions::DisplayText(0, 250, 1, 0, 0, "GAMEOVER");
+    opengl_extensions::DisplayText(0, 250, 1, 0, 0, "GAMEOVER");
 
-        auto points_text = "SCORE: " + std::to_string(points);
-        opengl_extensions::DisplayText(0, 200, 1, 0, 0, points_text);
+    auto points_text = "SCORE: " + std::to_string(points);
+    opengl_extensions::DisplayText(0, 200, 1, 0, 0, points_text);
 
-        opengl_extensions::DisplayText(0, 150, 1, 0, 0, "PRESS ENTER TO RESTART");
-    }
-    glFlush();
+    opengl_extensions::DisplayText(0, 150, 1, 0, 0, "PRESS ENTER TO RESTART");
 }
 
 int last_elapsed_time = 0;
@@ -98,43 +97,50 @@ void Display()
 
     last_elapsed_time = elapsed_time;
 
-    if (game_over)
-        DisplayGameOver();
-    else
+    auto enemies_count = enemies.size();
+
+    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&](Enemy* enemy)
     {
-        auto enemies_count = enemies.size();
-        enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [&](Enemy& enemy)
-        {
-            return enemy.dead();
-        }), enemies.end());
-        points += enemies_count - enemies.size();
+        auto enemy_is_dead = enemy->dead();
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        {
-            gameobject::DrawGameObjects((gameobject::GameObject**) tile_map->GetTiles(), tile_map->size());
-            gameobject::DrawGameObject(*entrance);
+        if (enemy_is_dead) delete enemy;
 
-            std::for_each(enemies.begin(), enemies.end(), [&](Enemy& enemy)
+        return enemy_is_dead;
+    }), enemies.end());
+
+    points += enemies_count - enemies.size();
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    {
+        gameobject::DrawGameObjects((gameobject::GameObject**) tile_map->GetTiles(), tile_map->size());
+        gameobject::DrawGameObject(*entrance);
+
+        std::for_each(enemies.begin(), enemies.end(), [&](Enemy* enemy)
+        {
+            gameobject::DrawGameObject(*enemy);
+
+            if (!game_over)
             {
-                enemy.Update(delta_time);
-                gameobject::DrawGameObject(enemy);
+                enemy->Update(delta_time);
+                game_over = enemy->GetCurrentNode()->index == math::Vector2<int>(16, 13);
+            }
+        });
 
-                if (!game_over)
-                    game_over = enemy.GetCurrentNode()->index == math::Vector2<int>(16, 13);
-            });
+        gameobject::DrawGameObject(*player);
 
+        if (!game_over)
             player->Update(delta_time);
-            gameobject::DrawGameObject(*player);
-        }
-        glFlush();
+        else
+            DisplayGameOver();
+    }
+    glFlush();
 
-        total_elapsed_time += delta_time;
+    total_elapsed_time += delta_time;
 
-        if (total_elapsed_time > 1000)
-        {
-            total_elapsed_time = 0;
-            enemy_manager::AddEnemy(*tile_map, *asset_manager, *pathfinding_graph, enemies);
-        }
+    if (total_elapsed_time > 1000 && !game_over)
+    {
+        total_elapsed_time = 0;
+        enemy_manager::AddEnemy(*tile_map, *asset_manager, *pathfinding_graph, enemies);
     }
 }
 
@@ -172,6 +178,9 @@ void cleanup_game_data()
     delete asset_manager;
     delete entrance;
     delete player;
+
+    std::for_each(enemies.begin(), enemies.end(), [&](Enemy* enemy)
+    { delete enemy; });
 }
 
 void init()

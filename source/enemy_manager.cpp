@@ -6,7 +6,7 @@
 
 void enemy_manager::AddEnemy(TileMap& map, const AssetManager& asset_manager,
                              pathfinding::PathfindingGraph& pathfinding_graph,
-                             std::vector<Enemy>& enemies)
+                             std::vector<Enemy*>& enemies)
 {
     auto map_dimensions = map.GetMapDimensions();
 
@@ -34,12 +34,16 @@ void enemy_manager::AddEnemy(TileMap& map, const AssetManager& asset_manager,
 
     auto orcSpritesheet = asset_manager.get_asset("orc");
 
-    Enemy enemy(&map, &pathfinding_graph, animation::Running(orcSpritesheet, 256, directions::SOUTH),
-                map.GetTilePositionByIndex(index_to_spawn), math::Vector2<float>(40, 80),
-                orcSpritesheet->textureid);
+    auto enemy = new Enemy(&map,
+                           &pathfinding_graph,
+                           animation::Running(orcSpritesheet, 256, directions::SOUTH),
+                           animation::Dying(orcSpritesheet, 256, directions::SOUTH),
+                           map.GetTilePositionByIndex(index_to_spawn),
+                           math::Vector2<float>(40, 80),
+                           orcSpritesheet->textureid);
 
-    enemy.ChangePath(pathfinding_graph.FindPath(*pathfinding_graph.GetNodeByIndex(index_to_spawn),
-                                                *pathfinding_graph.GetNodeByIndex(math::Vector2<int>(16, 13))));
+    enemy->ChangePath(pathfinding_graph.FindPath(*pathfinding_graph.GetNodeByIndex(index_to_spawn),
+                                                 *pathfinding_graph.GetNodeByIndex(math::Vector2<int>(16, 13))));
 
     enemies.push_back(enemy);
 }
