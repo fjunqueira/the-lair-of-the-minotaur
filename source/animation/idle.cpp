@@ -8,7 +8,7 @@ animation::Idle::Idle(const Image* spritesheet, const int& num_of_frames, const 
         frame_width_((float) (spritesheet->width / (num_of_frames / 8)) / spritesheet->width),
         frame_height_((float) (spritesheet->height / 8) / spritesheet->height)
 {
-    this->MoveToNextFrame(direction, 0);
+    this->MoveToNextFrame(direction, -1);
 }
 
 int animation::Idle::type() const
@@ -37,7 +37,7 @@ bool animation::Idle::MoveToNextFrame(const int& direction, const float& delta)
         frame_increment_direction_ = 1;
     }
 
-    if (total_elapsed_time_ > 300 || delta == 0)
+    if (total_elapsed_time_ > 300 || delta == -1)
     {
         total_elapsed_time_ = 0;
         this->current_frame_ += frame_increment_direction_;

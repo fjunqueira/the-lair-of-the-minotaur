@@ -1,4 +1,6 @@
 bin/
+build/
 .idea/
 libs/
-
+launch.json
+settings.json

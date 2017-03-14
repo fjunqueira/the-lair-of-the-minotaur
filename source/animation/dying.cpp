@@ -8,7 +8,7 @@ animation::Dying::Dying(const Image* spritesheet, const int& num_of_frames, cons
         frame_width_((float) (spritesheet->width / (num_of_frames / 8)) / spritesheet->width),
         frame_height_((float) (spritesheet->height / 8) / spritesheet->height)
 {
-    this->MoveToNextFrame(direction, 0);
+    this->MoveToNextFrame(direction, -1);
 }
 
 int animation::Dying::type() const
@@ -31,7 +31,7 @@ bool animation::Dying::MoveToNextFrame(const int& direction, const float& delta)
                     math::Vector2<float>(frame_width_ * (current_frame_ - 1), frame_height_ * (direction - 1)),
             };
 
-    if (total_elapsed_time_ > 100 || delta == 0)
+    if (total_elapsed_time_ > 100 || delta == -1)
     {
         total_elapsed_time_ = 0;
         this->current_frame_++;
