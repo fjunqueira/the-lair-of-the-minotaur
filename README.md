@@ -4,7 +4,7 @@ Another project made for the graphics processing subject in college, an isometri
 
 This one was really fun to make!
 
-####Build instructions
+#### Build instructions
 ```bash
 # Install dependencies
 sudo apt-get install uuid-dev libxmu-dev libxi-dev freeglut3-dev
